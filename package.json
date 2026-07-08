@@ -1,4 +1,6 @@
 {
+  "name": "ternlight-demo",
+  "description": "Playful on-device semantic-embedding toolkit + live web UI built on @ternlight/base.",
   "dependencies": {
     "@ternlight/base": "^0.1.0"
   },
