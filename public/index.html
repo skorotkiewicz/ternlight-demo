@@ -5,57 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ternlight · live demo</title>
 <style>
-  :root { --bg:#0f1020; --card:#1a1c33; --ink:#e9eaff; --muted:#9aa0c7;
-         --accent:#7c6cff; --accent2:#36d6c3; --bar:#2a2d52; }
+  :root {
+    --bg:#0c0c0e; --fg:#c9c9c9; --mut:#6f6f78; --line:#232329;
+    --acc:#9ece6a; --bar:#1a1a1f;
+  }
   * { box-sizing:border-box }
-  body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         background:radial-gradient(1200px 600px at 70% -10%,#241f4d,var(--bg)); color:var(--ink); }
-  header { padding:34px 24px 10px; text-align:center }
-  header h1 { margin:0; font-size:34px; letter-spacing:.5px;
-              background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent }
-  header p { margin:6px 0 0; color:var(--muted) }
-  nav { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; padding:18px 16px 4px }
-  nav button { background:var(--card); color:var(--muted); border:1px solid #2a2d52;
-               padding:9px 14px; border-radius:999px; cursor:pointer; font-size:13px; transition:.15s }
-  nav button:hover { color:var(--ink) }
-  nav button.active { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0f1020; border-color:transparent; font-weight:600 }
-  main { max-width:760px; margin:0 auto; padding:18px 16px 60px }
-  .panel { display:none; background:var(--card); border:1px solid #2a2d52; border-radius:16px; padding:20px;
-           box-shadow:0 20px 50px -30px #000 }
-  .panel.active { display:block; animation:fade .2s ease }
-  @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1} }
-  h2 { margin:0 0 4px; font-size:18px }
-  .hint { color:var(--muted); margin:0 0 14px; font-size:13px }
-  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; text-transform:uppercase; letter-spacing:.5px }
-  textarea, input[type=text], input[type=number] { width:100%; background:#11132a; color:var(--ink);
-          border:1px solid #2a2d52; border-radius:10px; padding:10px 12px; font:inherit; resize:vertical }
+  body {
+    margin:0; background:var(--bg); color:var(--fg);
+    font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  a { color:var(--acc); text-decoration:none }
+  a:hover { text-decoration:underline }
+  code { background:#141417; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:12px }
+
+  header { max-width:760px; margin:0 auto; padding:52px 20px 10px }
+  header h1 { margin:0; font-size:22px; font-weight:600; letter-spacing:.5px }
+  header h1::before { content:"~/ "; color:var(--mut) }
+  header p { color:var(--mut); margin:8px 0 0; font-size:13px }
+  .gh { margin:12px 0 0; display:flex; gap:14px; align-items:center; font-size:13px }
+
+  nav { max-width:760px; margin:0 auto; padding:16px 20px; display:flex; gap:20px; flex-wrap:wrap; border-bottom:1px solid var(--line) }
+  nav button { background:none; border:0; color:var(--mut); cursor:pointer; font:inherit; font-size:13px; padding:4px 0 }
+  nav button:hover { color:var(--fg) }
+  nav button.active { color:var(--fg); border-bottom:1px solid var(--acc) }
+
+  main { max-width:760px; margin:0 auto; padding:26px 20px 80px }
+  .panel { display:none }
+  .panel.active { display:block; animation:fade .15s ease }
+  @keyframes fade { from{opacity:0} to{opacity:1} }
+  h2 { margin:0 0 4px; font-size:16px; font-weight:600 }
+  h2::before { content:"# "; color:var(--acc) }
+  .hint { color:var(--mut); margin:0 0 18px; font-size:12.5px }
+
+  label { display:block; color:var(--mut); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin:16px 0 6px }
+  textarea, input[type=text], input[type=number] {
+    width:100%; background:#111114; color:var(--fg); border:1px solid var(--line);
+    border-radius:6px; padding:9px 11px; font:inherit; resize:vertical;
+  }
+  textarea:focus, input:focus { outline:none; border-color:var(--acc) }
   textarea { min-height:96px }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px }
-  button.run { margin-top:16px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0f1020;
-               border:0; padding:11px 20px; border-radius:10px; font-weight:600; cursor:pointer; font-size:14px }
-  button.run:disabled { opacity:.6; cursor:wait }
-  .out { margin-top:16px; min-height:40px }
-  .row, .crow { display:flex; align-items:center; gap:10px; padding:7px 0; border-top:1px solid #23264a }
-  .row .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-  .row .rank { width:26px; color:var(--accent2); font-weight:700 }
-  .bar { width:42%; background:var(--bar); border-radius:6px; height:10px; overflow:hidden }
-  .fill { display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0 }
-  .val { width:54px; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums }
-  .odd { background:#2a1d3a; border:1px solid var(--accent); border-radius:10px; padding:12px; margin-bottom:8px }
-  .muted { color:var(--muted) }
-  .err { color:#ff9aa2 }
-  .ctrack { position:relative; flex:1; height:10px; background:linear-gradient(90deg,var(--accent2),#2a2d52,var(--accent)); border-radius:6px }
-  .cmark { position:absolute; top:-3px; width:16px; height:16px; border-radius:50%; background:#fff; transform:translateX(-50%); box-shadow:0 0 0 3px #0f1020 }
-  .legend { display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-bottom:6px }
-  .cval { width:150px; text-align:right; color:var(--muted); font-size:12px }
-</style>
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px }
+
+  button.run { margin-top:18px; background:none; color:var(--acc); border:1px solid var(--acc);
+               border-radius:6px; padding:8px 16px; font:inherit; font-size:13px; cursor:pointer }
+  button.run:hover { background:var(--acc); color:var(--bg) }
+  button.run:disabled { opacity:.5; cursor:wait }
+
+  .out { margin-top:20px; border-top:1px solid var(--line); padding-top:14px }
+  .row, .crow { display:flex; align-items:center; gap:12px; padding:6px 0; border-bottom:1px solid var(--line) }
+  .row:last-child, .crow:last-child { border-bottom:0 }
+  .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .rank { width:28px; color:var(--acc); font-weight:600 }
+  .bar { width:40%; height:6px; background:var(--bar); border-radius:3px; overflow:hidden }
+  .fill { display:block; height:100%; background:var(--acc); width:0 }
+  .val { width:56px; text-align:right; color:var(--mut); font-variant-numeric:tabular-nums }
+  .odd { border:1px solid var(--acc); border-radius:6px; padding:10px 12px; margin-bottom:10px; font-size:13px }
+  .odd b { color:var(--acc) }
+  .muted { color:var(--mut) }
+  .err { color:#f7768e }
+
+  .ctrack { position:relative; flex:1; height:6px; background:var(--bar); border-radius:3px }
+  .cmark { position:absolute; top:50%; width:10px; height:10px; border-radius:50%; background:var(--acc); transform:translate(-50%,-50%) }
+  .legend { display:flex; justify-content:space-between; color:var(--mut); font-size:12px; margin-bottom:8px }
+  .cval { width:170px; text-align:right; color:var(--mut); font-size:12px }
+  </style>
 </head>
 <body>
 <header>
   <h1>ternlight</h1>
   <p>on-device semantic embeddings · 384-dim · no API · every function, live</p>
-  <p style="margin:8px 0 0; display:flex; gap:12px; align-items:center; justify-content:center">
-    <a href="https://github.com/skorotkiewicz/ternlight-demo" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none">★ View source on GitHub</a>
+  <p class="gh">
+    <a href="https://github.com/skorotkiewicz/ternlight-demo" target="_blank" rel="noopener">★ View source on GitHub</a>
     <iframe src="https://ghbtns.com/github-btn.html?user=skorotkiewicz&repo=ternlight-demo&type=star&count=true" frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
   </p>
 </header>
