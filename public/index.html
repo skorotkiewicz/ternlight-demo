@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ternlight · live demo</title>
+<style>
+  :root { --bg:#0f1020; --card:#1a1c33; --ink:#e9eaff; --muted:#9aa0c7;
+         --accent:#7c6cff; --accent2:#36d6c3; --bar:#2a2d52; }
+  * { box-sizing:border-box }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:radial-gradient(1200px 600px at 70% -10%,#241f4d,var(--bg)); color:var(--ink); }
+  header { padding:34px 24px 10px; text-align:center }
+  header h1 { margin:0; font-size:34px; letter-spacing:.5px;
+              background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent }
+  header p { margin:6px 0 0; color:var(--muted) }
+  nav { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; padding:18px 16px 4px }
+  nav button { background:var(--card); color:var(--muted); border:1px solid #2a2d52;
+               padding:9px 14px; border-radius:999px; cursor:pointer; font-size:13px; transition:.15s }
+  nav button:hover { color:var(--ink) }
+  nav button.active { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0f1020; border-color:transparent; font-weight:600 }
+  main { max-width:760px; margin:0 auto; padding:18px 16px 60px }
+  .panel { display:none; background:var(--card); border:1px solid #2a2d52; border-radius:16px; padding:20px;
+           box-shadow:0 20px 50px -30px #000 }
+  .panel.active { display:block; animation:fade .2s ease }
+  @keyframes fade { from{opacity:0;transform:translateY(6px)} to{opacity:1} }
+  h2 { margin:0 0 4px; font-size:18px }
+  .hint { color:var(--muted); margin:0 0 14px; font-size:13px }
+  label { display:block; font-size:12px; color:var(--muted); margin:12px 0 5px; text-transform:uppercase; letter-spacing:.5px }
+  textarea, input[type=text], input[type=number] { width:100%; background:#11132a; color:var(--ink);
+          border:1px solid #2a2d52; border-radius:10px; padding:10px 12px; font:inherit; resize:vertical }
+  textarea { min-height:96px }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px }
+  button.run { margin-top:16px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0f1020;
+               border:0; padding:11px 20px; border-radius:10px; font-weight:600; cursor:pointer; font-size:14px }
+  button.run:disabled { opacity:.6; cursor:wait }
+  .out { margin-top:16px; min-height:40px }
+  .row, .crow { display:flex; align-items:center; gap:10px; padding:7px 0; border-top:1px solid #23264a }
+  .row .lbl { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .row .rank { width:26px; color:var(--accent2); font-weight:700 }
+  .bar { width:42%; background:var(--bar); border-radius:6px; height:10px; overflow:hidden }
+  .fill { display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0 }
+  .val { width:54px; text-align:right; color:var(--muted); font-variant-numeric:tabular-nums }
+  .odd { background:#2a1d3a; border:1px solid var(--accent); border-radius:10px; padding:12px; margin-bottom:8px }
+  .muted { color:var(--muted) }
+  .err { color:#ff9aa2 }
+  .ctrack { position:relative; flex:1; height:10px; background:linear-gradient(90deg,var(--accent2),#2a2d52,var(--accent)); border-radius:6px }
+  .cmark { position:absolute; top:-3px; width:16px; height:16px; border-radius:50%; background:#fff; transform:translateX(-50%); box-shadow:0 0 0 3px #0f1020 }
+  .legend { display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-bottom:6px }
+  .cval { width:150px; text-align:right; color:var(--muted); font-size:12px }
+</style>
+</head>
+<body>
+<header>
+  <h1>ternlight</h1>
+  <p>on-device semantic embeddings · 384-dim · no API · every function, live</p>
+</header>
+
+<nav id="tabs">
+  <button data-tab="corpus" class="active">Semantic Search</button>
+  <button data-tab="odd">Odd One Out</button>
+  <button data-tab="compass">Concept Compass</button>
+  <button data-tab="journal">Journal</button>
+  <button data-tab="closest">Closest Link</button>
+  <button data-tab="vibe">Vibe Recommender</button>
+</nav>
+
+<main>
+  <section class="panel active" data-panel="corpus">
+    <h2>Semantic Search</h2>
+    <p class="hint">One item per line. Finds the nearest matches to your query.</p>
+    <label>Corpus</label>
+    <textarea id="corpus-items">Reset your password
+Request a refund
+Track your delivery
+Update billing address</textarea>
+    <div class="grid2">
+      <div><label>Query</label><input type="text" id="corpus-query" value="I forgot my password" /></div>
+      <div><label>Top K</label><input type="number" id="corpus-topk" value="3" min="1" /></div>
+    </div>
+    <button class="run" id="run-corpus">Run</button>
+    <div class="out" id="corpus-out"></div>
+  </section>
+
+  <section class="panel" data-panel="odd">
+    <h2>Odd One Out</h2>
+    <p class="hint">The item least like the rest (great as a game or anomaly detector).</p>
+    <label>Items</label>
+    <textarea id="odd-items">pizza
+burger
+taco
+python</textarea>
+    <button class="run" id="run-odd">Run</button>
+    <div class="out" id="odd-out"></div>
+  </section>
+
+  <section class="panel" data-panel="compass">
+    <h2>Concept Compass</h2>
+    <p class="hint">Project items onto an axis between two anchor concepts.</p>
+    <div class="grid2">
+      <div><label>Pole A</label><input type="text" id="compass-a" value="calm solitude" /></div>
+      <div><label>Pole B</label><input type="text" id="compass-b" value="loud chaos" /></div>
+    </div>
+    <label>Items</label>
+    <textarea id="compass-items">a quiet cabin in the woods
+a rave in a warehouse
+a cozy bookshop
+a stadium concert</textarea>
+    <button class="run" id="run-compass">Run</button>
+    <div class="out" id="compass-out"></div>
+  </section>
+
+  <section class="panel" data-panel="journal">
+    <h2>You From The Past</h2>
+    <p class="hint">Format each line: <code>date | text</code>. Finds the day most like today.</p>
+    <label>Entries</label>
+    <textarea id="journal-entries">Mar 14 | felt anxious about the demo, could not sleep
+Apr 02 | great day, shipped the feature, celebrated
+May 09 | calm morning, wrote for two hours</textarea>
+    <label>Today</label>
+    <textarea id="journal-today">I am nervous about presenting tomorrow</textarea>
+    <button class="run" id="run-journal">Run</button>
+    <div class="out" id="journal-out"></div>
+  </section>
+
+  <section class="panel" data-panel="closest">
+    <h2>Closest Link</h2>
+    <p class="hint">Party game judge. Format each line: <code>player: guess</code>.</p>
+    <label>Secret word</label>
+    <input type="text" id="closest-secret" value="ocean" />
+    <label>Guesses</label>
+    <textarea id="closest-guesses">A: sea
+B: desk
+C: wave</textarea>
+    <button class="run" id="run-closest">Run</button>
+    <div class="out" id="closest-out"></div>
+  </section>
+
+  <section class="panel" data-panel="vibe">
+    <h2>Vibe Recommender</h2>
+    <p class="hint">"More like this." One title per line (optionally <code>title | shelf</code>).</p>
+    <label>Seed</label>
+    <input type="text" id="vibe-seed" value="cozy mystery novel" />
+    <label>Catalog</label>
+    <textarea id="vibe-catalog">hard sci-fi epic | A1
+a warm whodunit | B3
+romantic comedy | C2
+noir detective | B4</textarea>
+    <div class="grid2">
+      <div><label>Top K</label><input type="number" id="vibe-topk" value="4" min="1" /></div>
+    </div>
+    <button class="run" id="run-vibe">Run</button>
+    <div class="out" id="vibe-out"></div>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const lines = (id) => $(id).value.split('\n').map(s => s.trim()).filter(Boolean);
+  const esc = (s) => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  async function post(path, payload) {
+    const r = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'request failed');
+    return data;
+  }
+  const fail = (e) => `<p class="err">${esc(e.message)}</p>`;
+
+  function simRows(list, fmt) {
+    return list.map((x, i) => {
+      const v = x.sim ?? x.score ?? 0;
+      const pct = Math.max(2, Math.round(Math.abs(v) * 100));
+      return `<div class="row">${fmt ? fmt(x, i) : ''}<span class="lbl">${esc(x.text ?? '')}</span>
+        <span class="bar"><span class="fill" style="width:${pct}%"></span></span>
+        <span class="val">${v.toFixed(3)}</span></div>`;
+    }).join('');
+  }
+
+  $('run-corpus').onclick = async (e) => {
+    const out = $('corpus-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try { out.innerHTML = simRows(await post('/api/corpus', { items: lines('corpus-items'), query: $('corpus-query').value, topK: +$('corpus-topk').value || 5 })); }
+    catch (err) { out.innerHTML = fail(err); }
+  };
+
+  $('run-odd').onclick = async () => {
+    const out = $('odd-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try {
+      const { odd, ranked } = await post('/api/odd', { items: lines('odd-items') });
+      out.innerHTML = `<div class="odd">🎯 odd one out: <b>${esc(odd.text)}</b> <span class="muted">(avg sim ${odd.score.toFixed(3)})</span></div>` + simRows(ranked);
+    } catch (err) { out.innerHTML = fail(err); }
+  };
+
+  $('run-compass').onclick = async () => {
+    const out = $('compass-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try {
+      const a = $('compass-a').value, b = $('compass-b').value;
+      const data = await post('/api/compass', { poleA: a, poleB: b, items: lines('compass-items') });
+      out.innerHTML = `<div class="legend"><span>← ${esc(b)}</span><span>${esc(a)} →</span></div>` +
+        data.map(x => `<div class="crow"><span class="lbl" style="flex:1">${esc(x.text)}</span>
+          <span class="ctrack"><span class="cmark" style="left:${Math.round((x.pos + 1) / 2 * 100)}%"></span></span>
+          <span class="cval">${x.pos.toFixed(3)} → ${esc(x.toward)}</span></div>`).join('');
+    } catch (err) { out.innerHTML = fail(err); }
+  };
+
+  $('run-journal').onclick = async () => {
+    const out = $('journal-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try {
+      const entries = lines('journal-entries').map(l => { const [date, ...rest] = l.split('|'); return { date: (date || '').trim(), text: rest.join('|').trim() }; });
+      out.innerHTML = simRows(await post('/api/journal', { entries, today: $('journal-today').value }),
+        (x) => `<span class="rank">${esc(x.date)}</span>`);
+    } catch (err) { out.innerHTML = fail(err); }
+  };
+
+  $('run-closest').onclick = async () => {
+    const out = $('closest-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try {
+      const guesses = lines('closest-guesses').map(l => { const [player, ...rest] = l.split(':'); return { player: (player || '').trim(), guess: rest.join(':').trim() }; });
+      out.innerHTML = simRows(await post('/api/closest', { secret: $('closest-secret').value, guesses }),
+        (x, i) => `<span class="rank">#${i + 1}</span>`);
+    } catch (err) { out.innerHTML = fail(err); }
+  };
+
+  $('run-vibe').onclick = async () => {
+    const out = $('vibe-out'); out.innerHTML = '<p class="muted">thinking…</p>';
+    try {
+      const catalog = lines('vibe-catalog').map(l => { const [title, shelf] = l.split('|'); return { title: (title || '').trim(), shelf: (shelf || '').trim() }; });
+      out.innerHTML = simRows(await post('/api/vibe', { seed: $('vibe-seed').value, catalog, topK: +$('vibe-topk').value || 5 }),
+        (x) => x.shelf ? `<span class="rank">${esc(x.shelf)}</span>` : '');
+    } catch (err) { out.innerHTML = fail(err); }
+  };
+
+  document.querySelectorAll('#tabs button').forEach(btn => btn.onclick = () => {
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+  });
+</script>
+</body>
+</html>

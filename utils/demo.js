@@ -1,4 +1,5 @@
 import { embed, cosineSim, similar } from '@ternlight/base';
+import { buildCorpus } from './corpus.js';
 
 // One primitive: string → 384-dim L2-normalized Float32Array
 const c = cosineSim(embed('reset my password'), embed('I forgot my password'));   // 0.88
@@ -21,3 +22,10 @@ const x = similar('I want my money back', [
   'Refund',
 ], { topK: 2 });
 console.log(x)
+
+const faq = buildCorpus([
+  { text: 'Reset password', meta: { route: '/reset' } },
+  { text: 'Request a refund', meta: { route: '/refund' } },
+]);
+const xs = faq.search('I forgot my password', 1); // → [{ text, meta:{route:'/reset'}, sim:0.88 }]
+console.log(xs)

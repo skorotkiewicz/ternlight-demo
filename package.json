@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "@ternlight/base": "^0.1.0"
+  },
+  "scripts": {
+    "start": "bun server.js"
   }
 }
