@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8" >
+<meta name="viewport" content="width=device-width, initial-scale=1" >
 <title>ternlight · live demo</title>
-<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBjMGMwZSIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjYiIGZpbGw9IiM5ZWNlNmEiLz48L3N2Zz4=" />
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBjMGMwZSIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjYiIGZpbGw9IiM5ZWNlNmEiLz48L3N2Zz4=" >
 <style>
   :root {
     --bg:#0c0c0e; --fg:#c9c9c9; --mut:#6f6f78; --line:#232329;
@@ -18,6 +18,7 @@
   a { color:var(--acc); text-decoration:none }
   a:hover { text-decoration:underline }
   code { background:#141417; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:12px }
+  iframe { border:0; overflow:hidden }
 
   header { max-width:760px; margin:0 auto; padding:52px 20px 10px }
   header h1 { margin:0; font-size:22px; font-weight:600; letter-spacing:.5px }
@@ -77,17 +78,17 @@
   <p>on-device semantic embeddings · 384-dim · no API · every function, live</p>
   <p class="gh">
     <a href="https://github.com/skorotkiewicz/ternlight-demo" target="_blank" rel="noopener">★ View source on GitHub</a>
-    <iframe src="https://ghbtns.com/github-btn.html?user=skorotkiewicz&repo=ternlight-demo&type=star&count=true" frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
+    <iframe src="https://ghbtns.com/github-btn.html?user=skorotkiewicz&repo=ternlight-demo&type=star&count=true" width="150" height="20" title="GitHub"></iframe>
   </p>
 </header>
 
 <nav id="tabs">
-  <button data-tab="corpus" class="active">Semantic Search</button>
-  <button data-tab="odd">Odd One Out</button>
-  <button data-tab="compass">Concept Compass</button>
-  <button data-tab="journal">Journal</button>
-  <button data-tab="closest">Closest Link</button>
-  <button data-tab="vibe">Vibe Recommender</button>
+  <button type="button" data-tab="corpus" class="active">Semantic Search</button>
+  <button type="button" data-tab="odd">Odd One Out</button>
+  <button type="button" data-tab="compass">Concept Compass</button>
+  <button type="button" data-tab="journal">Journal</button>
+  <button type="button" data-tab="closest">Closest Link</button>
+  <button type="button" data-tab="vibe">Vibe Recommender</button>
 </nav>
 
 <main>
@@ -100,10 +101,10 @@ Request a refund
 Track your delivery
 Update billing address</textarea>
     <div class="grid2">
-      <div><label>Query</label><input type="text" id="corpus-query" value="I forgot my password" /></div>
-      <div><label>Top K</label><input type="number" id="corpus-topk" value="3" min="1" /></div>
+      <div><label>Query</label><input type="text" id="corpus-query" value="I forgot my password"></div>
+      <div><label>Top K</label><input type="number" id="corpus-topk" value="3" min="1"></div>
     </div>
-    <button class="run" id="run-corpus">Run</button>
+    <button type="button" class="run" id="run-corpus">Run</button>
     <div class="out" id="corpus-out"></div>
   </section>
 
@@ -115,7 +116,7 @@ Update billing address</textarea>
 burger
 taco
 python</textarea>
-    <button class="run" id="run-odd">Run</button>
+    <button type="button" class="run" id="run-odd">Run</button>
     <div class="out" id="odd-out"></div>
   </section>
 
@@ -123,15 +124,15 @@ python</textarea>
     <h2>Concept Compass</h2>
     <p class="hint">Project items onto an axis between two anchor concepts.</p>
     <div class="grid2">
-      <div><label>Pole A</label><input type="text" id="compass-a" value="calm solitude" /></div>
-      <div><label>Pole B</label><input type="text" id="compass-b" value="loud chaos" /></div>
+      <div><label>Pole A</label><input type="text" id="compass-a" value="calm solitude"></div>
+      <div><label>Pole B</label><input type="text" id="compass-b" value="loud chaos"></div>
     </div>
     <label>Items</label>
     <textarea id="compass-items">a quiet cabin in the woods
 a rave in a warehouse
 a cozy bookshop
 a stadium concert</textarea>
-    <button class="run" id="run-compass">Run</button>
+    <button type="button" class="run" id="run-compass">Run</button>
     <div class="out" id="compass-out"></div>
   </section>
 
@@ -144,7 +145,7 @@ Apr 02 | great day, shipped the feature, celebrated
 May 09 | calm morning, wrote for two hours</textarea>
     <label>Today</label>
     <textarea id="journal-today">I am nervous about presenting tomorrow</textarea>
-    <button class="run" id="run-journal">Run</button>
+    <button type="button" class="run" id="run-journal">Run</button>
     <div class="out" id="journal-out"></div>
   </section>
 
@@ -152,12 +153,12 @@ May 09 | calm morning, wrote for two hours</textarea>
     <h2>Closest Link</h2>
     <p class="hint">Party game judge. Format each line: <code>player: guess</code>.</p>
     <label>Secret word</label>
-    <input type="text" id="closest-secret" value="ocean" />
+    <input type="text" id="closest-secret" value="ocean">
     <label>Guesses</label>
     <textarea id="closest-guesses">A: sea
 B: desk
 C: wave</textarea>
-    <button class="run" id="run-closest">Run</button>
+    <button type="button" class="run" id="run-closest">Run</button>
     <div class="out" id="closest-out"></div>
   </section>
 
@@ -165,16 +166,16 @@ C: wave</textarea>
     <h2>Vibe Recommender</h2>
     <p class="hint">"More like this." One title per line (optionally <code>title | shelf</code>).</p>
     <label>Seed</label>
-    <input type="text" id="vibe-seed" value="cozy mystery novel" />
+    <input type="text" id="vibe-seed" value="cozy mystery novel">
     <label>Catalog</label>
     <textarea id="vibe-catalog">hard sci-fi epic | A1
 a warm whodunit | B3
 romantic comedy | C2
 noir detective | B4</textarea>
     <div class="grid2">
-      <div><label>Top K</label><input type="number" id="vibe-topk" value="4" min="1" /></div>
+      <div><label>Top K</label><input type="number" id="vibe-topk" value="4" min="1"></div>
     </div>
-    <button class="run" id="run-vibe">Run</button>
+    <button type="button" class="run" id="run-vibe">Run</button>
     <div class="out" id="vibe-out"></div>
   </section>
 </main>
