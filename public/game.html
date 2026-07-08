@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ternlight · closest link</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzBjMGMwZSIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjYiIGZpbGw9IiM5ZWNlNmEiLz48L3N2Zz4=">
+<style>
+  :root {
+    --bg:#0c0c0e; --fg:#c9c9c9; --mut:#6f6f78; --line:#232329;
+    --acc:#9ece6a; --bar:#1a1a1f;
+  }
+  * { box-sizing:border-box }
+  body {
+    margin:0; background:var(--bg); color:var(--fg);
+    font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  a { color:var(--acc); text-decoration:none }
+  a:hover { text-decoration:underline }
+  iframe { border:0; overflow:hidden }
+
+  header { max-width:760px; margin:0 auto; padding:52px 20px 10px }
+  header h1 { margin:0; font-size:22px; font-weight:600; letter-spacing:.5px }
+  header h1::before { content:"game/ "; color:var(--mut) }
+  header p { color:var(--mut); margin:8px 0 0; font-size:13px }
+  .gh { margin:12px 0 0; font-size:13px }
+
+  main { max-width:760px; margin:0 auto; padding:26px 20px 80px }
+  .screen { margin-top:8px }
+  h2 { margin:0 0 4px; font-size:16px; font-weight:600 }
+  h2::before { content:"# "; color:var(--acc) }
+  .hint { color:var(--mut); margin:0 0 18px; font-size:12.5px }
+
+  label { display:block; color:var(--mut); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin:16px 0 6px }
+  textarea, input[type=text], input[type=number] {
+    width:100%; background:#111114; color:var(--fg); border:1px solid var(--line);
+    border-radius:6px; padding:9px 11px; font:inherit; resize:vertical;
+  }
+  textarea:focus, input:focus { outline:none; border-color:var(--acc) }
+  textarea { min-height:84px }
+
+  button.run { margin-top:18px; background:none; color:var(--acc); border:1px solid var(--acc);
+               border-radius:6px; padding:8px 16px; font:inherit; font-size:13px; cursor:pointer }
+  button.run:hover { background:var(--acc); color:var(--bg) }
+  button.run:disabled { opacity:.5; cursor:wait }
+
+  .bar-top { display:flex; justify-content:space-between; color:var(--mut); font-size:13px; margin-bottom:18px }
+  .secret-wrap { text-align:center; padding:14px 0 }
+  .secret-label { color:var(--mut); font-size:11px; text-transform:uppercase; letter-spacing:1px }
+  .secret { font-size:30px; font-weight:600; margin-top:6px; color:var(--fg) }
+  .timer { height:6px; background:var(--bar); border-radius:3px; overflow:hidden; margin:14px 0 }
+  .timerfill { height:100%; background:var(--acc); width:100% }
+  .feedback { margin-top:18px; border-top:1px solid var(--line); padding-top:14px; min-height:20px }
+  .feedback .tier { font-size:18px; font-weight:600; color:var(--acc) }
+  .feedback .line { color:var(--mut); font-size:13px; margin-top:4px }
+  .next { margin-top:10px; color:var(--acc); cursor:pointer }
+  .final { font-size:28px; font-weight:600 }
+  .rank { margin-top:10px; font-size:16px; color:var(--acc) }
+  .err { color:#f7768e }
+</style>
+</head>
+<body>
+<header>
+  <h1>closest link</h1>
+  <p>semantic guessing game · how close can you get?</p>
+  <p class="gh"><a href="/">← back to demo</a></p>
+</header>
+
+<main>
+  <section id="start" class="screen">
+    <h2>How to play</h2>
+    <p class="hint">I show you a secret word. You type the word you think is <b>closest in meaning</b>. The on-device model scores your guess by cosine similarity — highest round score wins the title. 15 seconds per round, 5 rounds. One guess per line if you're feeling lucky.</p>
+    <button type="button" id="begin" class="run">Start</button>
+  </section>
+
+  <section id="game" class="screen" hidden>
+    <div class="bar-top">
+      <span id="round">round 1 / 5</span>
+      <span id="score">score 0.00</span>
+    </div>
+    <div class="secret-wrap">
+      <div class="secret-label">secret word</div>
+      <div id="secret" class="secret">banana</div>
+    </div>
+    <div class="timer"><div id="timerfill" class="timerfill"></div></div>
+    <label for="guess">your guess(es) — one per line</label>
+    <textarea id="guess" placeholder="pizza&#10;fruit&#10;yellow"></textarea>
+    <button type="button" id="submit" class="run">Judge me</button>
+    <div id="feedback" class="feedback"></div>
+  </section>
+
+  <section id="end" class="screen" hidden>
+    <h2>Final score</h2>
+    <div id="final" class="final"></div>
+    <div id="rank" class="rank"></div>
+    <button type="button" id="again" class="run">Play again</button>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const SECRETS = [
+    'banana', 'a tax audit', 'existential dread',
+    'a meeting that should have been an email', 'taco', 'velociraptor',
+    'Monday morning', 'free pizza', 'the void', 'your ex new partner',
+    'a cozy blanket', 'sysadmin on call', 'a squeaky rubber duck',
+    'the last slice of pizza', 'capitalism', 'a hug from grandma',
+    'spiders', 'the group chat at 3am', 'a broken build on Friday 5pm', 'nostalgia'
+  ];
+  const MAX = 5, TIME = 15;
+  let round = 0, total = 0, timer = null, secret = '';
+
+  function show(id) { ['start', 'game', 'end'].forEach((s) => { $(s).hidden = (s !== id); }); }
+  function escapeHtml(s) { return s.replace(/[&<>]/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[c])); }
+
+  function tier(sim) {
+    if (sim >= 0.82) return ['TELEPATH', 'the model is genuinely concerned'];
+    if (sim >= 0.65) return ['TOASTY', 'model nods, impressed'];
+    if (sim >= 0.45) return ['LUKEWARM', 'semantic, but spiritually elsewhere'];
+    if (sim >= 0.25) return ['FRIGID', 'the model squints at you'];
+    return ['WHAT', 'the model has no idea what you meant. brave.'];
+  }
+  function rankTitle(avg) {
+    if (avg >= 0.7) return 'EMBEDDING WHISPERER';
+    if (avg >= 0.5) return 'VECTOR VOYAGER';
+    if (avg >= 0.3) return 'TOKEN TINKERER';
+    return 'BAG OF WORDS';
+  }
+
+  async function judge(sec, guesses) {
+    const r = await fetch('/api/closest', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: sec, guesses: guesses.map((g) => ({ player: 'you', guess: g })) })
+    });
+    if (!r.ok) throw new Error('api error');
+    return r.json();
+  }
+
+  function startGame() { round = 0; total = 0; nextRound(); }
+
+  function nextRound() {
+    if (round >= MAX) return endGame();
+    round++;
+    secret = SECRETS[Math.floor(Math.random() * SECRETS.length)];
+    $('round').textContent = `round ${round} / ${MAX}`;
+    $('score').textContent = `score ${total.toFixed(2)}`;
+    $('secret').textContent = secret;
+    $('guess').value = '';
+    $('feedback').innerHTML = '';
+    show('game');
+    let left = TIME;
+    const fill = $('timerfill');
+    fill.style.width = '100%';
+    clearInterval(timer);
+    timer = setInterval(() => {
+      left--;
+      fill.style.width = (left / TIME * 100) + '%';
+      if (left <= 0) { clearInterval(timer); submit(true); }
+    }, 1000);
+  }
+
+  async function submit(timeup) {
+    clearInterval(timer);
+    const guesses = $('guess').value.split('\n').map((s) => s.trim()).filter(Boolean);
+    $('submit').disabled = true;
+    let sim = 0, best = '';
+    try {
+      if (guesses.length) {
+        const res = await judge(secret, guesses);
+        sim = res[0].sim;
+        best = res[0].guess;
+      }
+    } catch (e) {
+      $('feedback').innerHTML = `<p class="err">${escapeHtml(e.message)}</p>`;
+      $('submit').disabled = false;
+      return;
+    }
+    total += sim;
+    const [t, msg] = tier(sim);
+    $('score').textContent = `score ${total.toFixed(2)}`;
+    $('feedback').innerHTML =
+      `<div class="tier">${t}</div>` +
+      `<div class="line">your best: <b>${best ? escapeHtml(best) : '—'}</b> · sim ${sim.toFixed(3)}</div>` +
+      `<div class="line">${timeup && !guesses.length ? 'time! ' : ''}${msg}</div>` +
+      `<div class="next" id="next">next round →</div>`;
+    $('next').onclick = () => { $('submit').disabled = false; nextRound(); };
+  }
+
+  function endGame() {
+    show('end');
+    const avg = total / MAX;
+    $('final').textContent = `${total.toFixed(2)} / ${MAX.toFixed(2)}  ·  avg ${avg.toFixed(2)}`;
+    $('rank').textContent = rankTitle(avg);
+  }
+
+  $('begin').onclick = startGame;
+  $('again').onclick = startGame;
+  $('submit').onclick = () => submit(false);
+  show('start');
+</script>
+</body>
+</html>

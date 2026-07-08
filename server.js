@@ -18,10 +18,15 @@ const handlers = {
 };
 
 const server = createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/') {
-    const html = await readFile(new URL('./public/index.html', import.meta.url));
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    return res.end(html);
+  if (req.method === 'GET') {
+    const rel = req.url === '/' ? './public/index.html' : `./public${req.url.split('?')[0]}`;
+    try {
+      const data = await readFile(new URL(rel, import.meta.url));
+      const ext = rel.split('.').pop();
+      const types = { html: 'text/html', js: 'text/javascript', css: 'text/css', svg: 'image/svg+xml', json: 'application/json', ico: 'image/x-icon' };
+      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
+      return res.end(data);
+    } catch {}
   }
   if (req.method === 'POST' && handlers[req.url]) {
     let body = '';
